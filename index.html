@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LaneIQ — Sales Pitch Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0c1f3f;
+    --navy-mid: #1a3460;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --cream: #f5f0e8;
+    --cream-dark: #ede6d8;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --green: #1a6b45;
+    --green-light: #e6f4ed;
+    --red: #8b1a1a;
+    --red-light: #faeaea;
+    --blue-light: #e8eef8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--navy);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--gold);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .header-brand { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 1.15rem; letter-spacing: 0.04em; }
+  .header-label { font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.45); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .mode-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid rgba(201,168,76,0.6);
+    background: rgba(201,168,76,0.1);
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .mode-toggle:hover { background: rgba(201,168,76,0.2); }
+  .mode-toggle.client-active { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+
+  .phase-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .phase-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .phase-btn:hover, .phase-btn.active { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 500; }
+
+  .main { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--cream-dark); }
+  .section-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--navy); line-height: 1.2; }
+  .section-subtitle { margin-top: 8px; font-size: 0.9rem; color: var(--muted); max-width: 620px; line-height: 1.6; }
+
+  .card { background: white; border: 1px solid var(--cream-dark); border-radius: 6px; padding: 28px 32px; margin-bottom: 20px; }
+  .card-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .card-title .tag { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; font-style: normal; white-space: nowrap; }
+  .tag-say { background: #e8f4e8; color: #1a5c1a; }
+  .tag-ask { background: #e8eef8; color: #1a3460; }
+  .tag-warning { background: var(--red-light); color: var(--red); }
+
+  .talk-track { font-size: 0.95rem; line-height: 1.75; color: #2d3748; }
+  .talk-track em { color: var(--navy); font-style: normal; font-weight: 600; }
+
+  /* SCRIPT HIGHLIGHT — presenter only */
+  .talk-track .highlight {
+    background: #fffbea;
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.93rem;
+  }
+
+  /* CLIENT KEY MESSAGE — shows in client view instead of script */
+  .key-message {
+    background: var(--navy);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 14px 0;
+  }
+  .key-message-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .key-message-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: white;
+    line-height: 1.5;
+  }
+
+  /* CLIENT INSIGHT — replaces A in Q items */
+  .insight-list { display: grid; gap: 14px; }
+  .insight-item { border: 1px solid var(--cream-dark); border-radius: 4px; overflow: hidden; }
+  .insight-question {
+    background: var(--navy);
+    color: white;
+    padding: 14px 18px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .insight-question::before {
+    content: "?";
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    background: var(--gold);
+    color: var(--navy);
+    min-width: 18px;
+    height: 18px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-weight: 700;
+  }
+  .insight-body {
+    background: white;
+    padding: 14px 18px;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: #374151;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .insight-body::before {
+    content: "→";
+    font-size: 0.85rem;
+    color: var(--gold);
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-weight: 700;
+  }
+
+  /* FEATURE LIST — client view for product features */
+  .feature-list { display: grid; gap: 12px; margin: 16px 0; }
+  .feature-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: white;
+    border: 1px solid var(--cream-dark);
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+  .feature-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .feature-content h4 { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+  .feature-content p { font-size: 0.85rem; color: #4b5563; line-height: 1.6; }
+
+  /* TAB EXPLAINER */
+  .tab-row { display: grid; grid-template-columns: 160px 1fr 1fr; gap: 0; border: 1px solid var(--cream-dark); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+  .tab-name { background: var(--navy); color: var(--gold-light); padding: 14px 16px; font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 500; display: flex; align-items: center; }
+  .tab-name.new-tab { background: #1a4a1a; color: #a8d5a8; }
+  .tab-question { background: #f0f4ff; padding: 14px 16px; font-size: 0.83rem; color: var(--navy-mid); font-style: italic; border-left: 1px solid var(--cream-dark); display: flex; align-items: center; line-height: 1.45; }
+  .tab-answer { background: white; padding: 14px 16px; font-size: 0.83rem; color: #374151; border-left: 1px solid var(--cream-dark); line-height: 1.5; display: flex; align-items: center; }
+  .tab-header-row { display: grid; grid-template-columns: 160px 1fr 1fr; gap: 0; margin-bottom: 4px; padding: 0 4px; }
+  .tab-col-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 0 12px; }
+
+  /* COMPETITOR TABLE */
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .comp-table th { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 8px 16px; border-bottom: 1px solid var(--cream-dark); background: var(--cream); }
+  .comp-table td { padding: 12px 16px; border-bottom: 1px solid var(--cream-dark); color: #374151; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:hover td { background: #fafaf8; }
+  .comp-name { font-weight: 600; color: var(--navy); font-size: 0.88rem; }
+  .price-tag { font-family: 'DM Mono', monospace; font-size: 0.8rem; font-weight: 500; }
+  .price-high { color: var(--red); }
+  .price-mid  { color: #7c5200; }
+  .price-low  { color: var(--green); }
+  .badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.06em; padding: 3px 7px; border-radius: 2px; text-transform: uppercase; font-weight: 500; }
+  .badge-yours { background: var(--gold); color: var(--navy); }
+
+  /* OBJECTIONS */
+  .objection { border-left: 4px solid var(--navy); background: white; border-radius: 0 6px 6px 0; margin-bottom: 16px; overflow: hidden; }
+  .objection-q { padding: 14px 20px; font-weight: 600; font-size: 0.9rem; color: var(--navy); background: var(--blue-light); display: flex; gap: 10px; align-items: center; }
+  .objection-q::before { content: "⚡"; font-size: 0.85rem; }
+  .objection-a { padding: 14px 20px; font-size: 0.88rem; line-height: 1.7; color: #374151; }
+  .objection-a strong { color: var(--navy); }
+
+  /* CLIENT OBJECTION — cleaner version without script framing */
+  .faq-item { background: white; border: 1px solid var(--cream-dark); border-radius: 6px; margin-bottom: 12px; overflow: hidden; }
+  .faq-q { padding: 16px 20px; font-weight: 600; font-size: 0.92rem; color: var(--navy); background: var(--blue-light); border-bottom: 1px solid var(--cream-dark); }
+  .faq-a { padding: 16px 20px; font-size: 0.88rem; line-height: 1.7; color: #374151; }
+  .faq-a strong { color: var(--navy); }
+
+  /* PRICING */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .price-card { border: 1px solid var(--cream-dark); border-radius: 6px; overflow: hidden; background: white; }
+  .price-card.featured { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .price-card-header { background: var(--navy); padding: 14px 16px; color: white; }
+  .price-card.featured .price-card-header { background: var(--gold); color: var(--navy); }
+  .price-tier { font-weight: 700; font-size: 0.85rem; }
+  .price-naics { font-family: 'DM Mono', monospace; font-size: 0.65rem; opacity: 0.7; margin-top: 2px; }
+  .price-card-body { padding: 14px 16px; }
+  .price-onetime { font-family: 'DM Mono', monospace; font-size: 1.2rem; font-weight: 500; color: var(--navy); }
+  .price-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 8px; }
+  .price-sub { font-size: 0.78rem; color: #374151; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cream-dark); line-height: 1.5; }
+
+  /* CALLOUTS */
+  .callout { border-radius: 6px; padding: 16px 20px; margin: 14px 0; font-size: 0.88rem; line-height: 1.6; display: flex; gap: 12px; align-items: flex-start; }
+  .callout-gold  { background: #fffbea; border: 1px solid #e8c97a; }
+  .callout-green { background: var(--green-light); border: 1px solid #a8d5be; }
+  .callout-navy  { background: var(--blue-light); border: 1px solid #b8cae8; }
+  .callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .callout-text { color: #374151; }
+  .callout-text strong { color: var(--navy); }
+
+  /* CTA BLOCK — client version of "the close" */
+  .cta-block {
+    background: var(--navy);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 20px 0;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .cta-block-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .cta-block-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .cta-block-text { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: white; line-height: 1.5; }
+  .cta-block-sub { margin-top: 8px; font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* STEP LIST */
+  .step-list { counter-reset: steps; }
+  .step { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+  .step-num { counter-increment: steps; width: 32px; height: 32px; background: var(--navy); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .step-content h4 { font-size: 0.95rem; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+  .step-content p { font-size: 0.85rem; color: #4b5563; line-height: 1.6; }
+
+  hr.divider { border: none; border-top: 1px solid var(--cream-dark); margin: 28px 0; }
+
+  /* COMING SOON */
+  .coming-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .coming-card { background: white; border: 1px solid var(--cream-dark); border-radius: 6px; padding: 24px; }
+  .coming-card::before { content: "COMING SOON"; font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.14em; color: var(--gold); display: block; margin-bottom: 10px; }
+  .coming-card-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--navy); margin-bottom: 8px; }
+  .coming-card-desc { font-size: 0.85rem; color: #4b5563; line-height: 1.65; }
+  .coming-card-value { margin-top: 12px; font-size: 0.8rem; font-weight: 600; color: var(--green); }
+
+  /* CLIENT MODE */
+  body.client-mode .coach-only { display: none !important; }
+  body.client-mode .presenter-only { display: none !important; }
+  body.client-mode .client-only { display: block !important; }
+  body.client-mode .section-subtitle { display: none; }
+  body.client-mode .header-label { display: none; }
+
+  .client-only { display: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .price-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .coming-grid { grid-template-columns: 1fr; }
+    .tab-row { grid-template-columns: 1fr; }
+    .tab-question, .tab-answer { border-left: none; border-top: 1px solid var(--cream-dark); }
+    .header { padding: 14px 20px; }
+    .main { padding: 24px 16px 60px; }
+    .phase-btn span { display: none; }
+    .cta-block { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-brand">LaneIQ · Rollins Group LLC</div>
+    <div class="header-label coach-only">Sales Pitch Companion · Confidential</div>
+  </div>
+  <div class="header-right">
+    <button class="mode-toggle" onclick="toggleMode(this)">👁 Presenter Mode</button>
+    <nav class="phase-nav">
+      <button class="phase-btn active" onclick="show('open', this)">① <span>Open</span></button>
+      <button class="phase-btn" onclick="show('product', this)">② <span>Product</span></button>
+      <button class="phase-btn" onclick="show('tabs', this)">③ <span>Walk-Through</span></button>
+      <button class="phase-btn" onclick="show('competitors', this)">④ <span>Competition</span></button>
+      <button class="phase-btn" onclick="show('pricing', this)">⑤ <span>Pricing</span></button>
+      <button class="phase-btn" onclick="show('comingsoon', this)">⑥ <span>Roadmap</span></button>
+      <button class="phase-btn" onclick="show('objections', this)">⑦ <span>Objections</span></button>
+    </nav>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ① OPEN -->
+  <div id="open" class="section active">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 01 — Opening</div>
+      <div class="section-title">Set the scene before you sell anything.</div>
+      <div class="section-subtitle coach-only">Lead with their problem. Don't mention your product until they've agreed the problem is real.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">The Opening Frame <span class="tag tag-say coach-only">Say this</span></div>
+
+      <!-- PRESENTER: script with quotes -->
+      <div class="presenter-only talk-track">
+        <div class="highlight">
+          "Let me ask you something before I show you anything. When you're trying to find your next federal contract — what does that process actually look like for you right now?"
+        </div>
+        <p><em>Wait. Let them talk.</em> Most will say: searching SAM.gov, following up on leads, word of mouth, chasing solicitations they find late. Whatever they say, affirm it and reflect it back.</p>
+        <br>
+        <div class="highlight">
+          "That's exactly what I hear from most contractors. And here's the frustrating part — by the time a contract shows up on SAM, the incumbent already has a 3-year head start. You're bidding on information everyone else has. The question is: <em>what are you doing with the data that's already out there before the solicitation even drops?</em>"
+        </div>
+      </div>
+
+      <!-- CLIENT: clean key messages -->
+      <div class="client-only">
+        <div class="key-message">
+          <div class="key-message-label">The Problem</div>
+          <div class="key-message-text">By the time a federal contract appears on SAM.gov, the incumbent already has a 3-year head start. Most small businesses are competing on information everyone else already has.</div>
+        </div>
+        <div class="key-message" style="margin-top:12px;">
+          <div class="key-message-label">The Question</div>
+          <div class="key-message-text">What are you doing with the data that's already out there — before the solicitation even drops?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">The 3 Questions Every Federal Contractor Has</div>
+      <div class="insight-list">
+        <div class="insight-item">
+          <div class="insight-question">Where is the government actually buying what I sell?</div>
+          <div class="insight-body">Not where you think they buy it. Which specific agencies, in which states, in what contract sizes — and how often.</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-question">How hard is it actually to get in the door?</div>
+          <div class="insight-body">How many companies are bidding on these contracts? Who's winning repeatedly? Is there an entrenched incumbent you can't dislodge, or is the door open?</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-question">Which opportunities are worth my time to pursue?</div>
+          <div class="insight-body">Not every open lane is a good lane. Where does your size, set-aside status, and capacity put you at an actual advantage?</div>
+        </div>
+      </div>
+
+      <!-- PRESENTER version of the "what I built" close -->
+      <div class="presenter-only talk-track" style="margin-top:16px;">
+        <div class="highlight">
+          "What I built answers all three — specifically for your NAICS codes, your state, your contract size range, and your set-aside status. Nobody else is building reports at this level of personalization for small businesses."
+        </div>
+      </div>
+
+      <!-- CLIENT version -->
+      <div class="client-only" style="margin-top:16px;">
+        <div class="key-message">
+          <div class="key-message-label">LaneIQ answers all three</div>
+          <div class="key-message-text">Built specifically for your NAICS codes, your state, your contract size range, and your set-aside status. Not a generic market report — a report built for your business.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">The 60-Second Hook <span class="tag tag-say coach-only">If they ask "what do you do?"</span></div>
+      <div class="presenter-only talk-track">
+        <div class="highlight">
+          "I pull federal contract award data directly from USAspending.gov — that's every contract the government has awarded — and I run it through a scoring model built around your specific business. Your NAICS codes, your state, your contract size, your set-aside status. The output is a report that tells you exactly which agencies are buying what you sell, how many companies are competing for those contracts, and which lanes have the lowest competition for a business like yours. Most of my clients use it to stop guessing and start targeting."
+        </div>
+      </div>
+      <div class="client-only">
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">🗂</div>
+            <div class="feature-content">
+              <h4>Data from USAspending.gov — the official federal source</h4>
+              <p>Every contract the government has awarded, processed and scored for your specific business profile.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-content">
+              <h4>Filtered to your world</h4>
+              <p>Your NAICS codes. Your state. Your contract size range. Your set-aside certifications. Nothing generic.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-content">
+              <h4>Ranked by where you can win</h4>
+              <p>Agencies, competition levels, and entry lanes scored by how well they fit your business — not just who spends the most.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② PRODUCT -->
+  <div id="product" class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 02 — Product Explanation</div>
+      <div class="section-title">What it is and what makes it different.</div>
+      <div class="section-subtitle coach-only">Business-level. No jargon. Connect every feature to a decision they need to make.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What the Report Actually Is <span class="tag tag-say coach-only">Say this</span></div>
+
+      <!-- PRESENTER -->
+      <div class="presenter-only talk-track">
+        <div class="highlight">
+          "Think of it like a market map. The federal government publishes every contract they award — agency, dollar amount, vendor, contract type, how many companies bid. I take that raw data, filter it to exactly your world, and score every opportunity based on your business profile. The output is an Excel workbook and a PDF — both designed to be used in meetings, strategy sessions, and BD planning."
+        </div>
+      </div>
+
+      <!-- CLIENT -->
+      <div class="client-only">
+        <div class="key-message">
+          <div class="key-message-label">What LaneIQ delivers</div>
+          <div class="key-message-text">A complete federal market map — every agency buying what you sell, scored and ranked by how well they fit your specific business. Delivered as an Excel workbook and a PDF within 48 hours.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">🏗</div>
+            <div class="feature-content">
+              <h4>Built for your NAICS — not generic</h4>
+              <p>Every number in the report reflects your specific codes. No national averages. No industry-wide benchmarks that don't apply to you.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🏆</div>
+            <div class="feature-content">
+              <h4>Scores lanes by competition — not just volume</h4>
+              <p>Most contractors chase the biggest contracts. LaneIQ scores by where you have the most room to win — lowest competition, strongest fit, highest recurring rate.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-content">
+              <h4>Shows active opportunities right now</h4>
+              <p>The report flags which of your top lanes have active solicitations closing in the next 60 days — so you can move immediately, not just plan.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔒</div>
+            <div class="feature-content">
+              <h4>Official federal data — not scraped or estimated</h4>
+              <p>Sourced directly from USAspending.gov, the same database federal procurement officers use. I process the bulk CSV files so you don't have to.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-gold coach-only">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text"><strong>Transition line:</strong> "Let me show you exactly what's in the report and what question each section answers for you. Pull up the PDF — I'll walk you through it."</div>
+    </div>
+  </div>
+
+  <!-- ③ WALK-THROUGH -->
+  <div id="tabs" class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 03 — Report Walk-Through</div>
+      <div class="section-title">Each tab answers a question they already have.</div>
+      <div class="section-subtitle coach-only">Don't explain what the tab is. Explain what decision it enables. Lead with the question, not the data.</div>
+    </div>
+
+    <div class="card">
+      <div class="tab-header-row">
+        <div class="tab-col-label" style="padding-left:16px;">Tab / Page</div>
+        <div class="tab-col-label">The question it answers</div>
+        <div class="tab-col-label">What to say</div>
+      </div>
+
+      <div class="tab-row">
+        <div class="tab-name">Cover / Profile</div>
+        <div class="tab-question">"Is this actually built for me or is it a generic report?"</div>
+        <div class="tab-answer">"See right here — your NAICS, your state, your contract range, your set-aside status, your pursuit style. Built specifically for your business profile. Nothing in here is a national average."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Executive Summary</div>
+        <div class="tab-question">"How big is my market and is it worth chasing?"</div>
+        <div class="tab-answer">"This is the 30-second answer. Annual spend in your space, awards per year, percentage of lanes with low competition. Before we go deeper — is this the size of market you expected?"</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Market Overview</div>
+        <div class="tab-question">"Which of my NAICS should I focus on first?"</div>
+        <div class="tab-answer">"Not all your NAICS are equal. This shows you where the volume actually lives and which codes have the most accessible lanes."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Agency Buyers</div>
+        <div class="tab-question">"Who do I actually call? Which agencies are realistic targets?"</div>
+        <div class="tab-answer">"This is your call list. Ranked by how well each agency fits your profile — not raw dollar volume. The agency spending the most may not be the best fit for your size or set-aside."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Competition</div>
+        <div class="tab-question">"Am I wasting my time or is there actually room to win?"</div>
+        <div class="tab-answer">"This is the gut-check page. Median offers across your lanes tells you how many companies are bidding per contract on average. A low number means real room to compete."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Incumbent Vendors</div>
+        <div class="tab-question">"Who am I competing against? Can I beat them?"</div>
+        <div class="tab-answer">"These are the companies winning the most contracts in your space right now. Large business incumbents are also potential teaming or subcontracting partners."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Best Entry Points</div>
+        <div class="tab-question">"Where do I start? What's my first move?"</div>
+        <div class="tab-answer">"This is the action page. Specific agency + contract size + set-aside combinations ranked by your score. Row 1 is your best opportunity. This is what 90 days of BD looks like."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name new-tab">Active Now ✦ New</div>
+        <div class="tab-question">"Are any of these lanes open right now — not just historically strong?"</div>
+        <div class="tab-answer">"Active solicitations closing in the next 60 days that match your top lanes. Historical intelligence plus live opportunity — act today, not just plan for next quarter."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Raw Data</div>
+        <div class="tab-question">"Can I dig deeper into a specific award or vendor?"</div>
+        <div class="tab-answer">"Every award in your market is here. Vendor, dollar amount, agency, date, contract type. Full transparency into the underlying data."</div>
+      </div>
+      <div class="tab-row">
+        <div class="tab-name">Data Quality</div>
+        <div class="tab-question">"How reliable is this? Where should I take it with a grain of salt?"</div>
+        <div class="tab-answer">"I show you exactly how complete the data is for each field. You'll know upfront which scores are high confidence and which are directional — no hidden gaps."</div>
+      </div>
+    </div>
+
+    <div class="callout callout-navy coach-only">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-text"><strong>Key move:</strong> After Best Entry Points, pause and ask — <em>"Of these top lanes, do any of them surprise you? Is there an agency on here you've been ignoring that maybe you shouldn't be?"</em></div>
+    </div>
+  </div>
+
+  <!-- ④ COMPETITORS -->
+  <div id="competitors" class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 04 — Competitive Landscape</div>
+      <div class="section-title">The big players charge enterprise prices. You don't.</div>
+      <div class="section-subtitle coach-only">Use this when the prospect asks about GovWin / Deltek / Bloomberg Government or when you want to preempt the comparison.</div>
+    </div>
+
+    <div class="card coach-only">
+      <div class="card-title">How to Frame the Comparison <span class="tag tag-say">Say this first</span></div>
+      <div class="talk-track">
+        <div class="highlight">
+          "The companies growing fastest in federal contracting — the ones doing $10M, $20M, $50M — they all have one thing in common: they invest in market intelligence. The tools they use are called GovWin, Deltek, Bloomberg Government. Great platforms. Also $15,000 to $30,000 a year. Built for large BD teams with a full-time analyst to run them. That's not what I'm selling."
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Who it's for</th>
+            <th>Annual cost</th>
+            <th>Personalization</th>
+            <th>Setup complexity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="comp-name">GovWin IQ<br><span style="font-size:0.75rem;font-weight:400;color:#6b7280;">by Deltek</span></div></td>
+            <td>Large contractors, BD teams of 5+</td>
+            <td><span class="price-tag price-high">$15,000–$30,000/yr</span></td>
+            <td>High — but requires dedicated analyst</td>
+            <td>High — weeks of onboarding</td>
+          </tr>
+          <tr>
+            <td><div class="comp-name">Bloomberg Government<br><span style="font-size:0.75rem;font-weight:400;color:#6b7280;">BGOV</span></div></td>
+            <td>Enterprise, policy + procurement teams</td>
+            <td><span class="price-tag price-high">$10,000–$25,000/yr</span></td>
+            <td>Moderate</td>
+            <td>High</td>
+          </tr>
+          <tr>
+            <td><div class="comp-name">Govly / Samwise<br><span style="font-size:0.75rem;font-weight:400;color:#6b7280;">Newer tools</span></div></td>
+            <td>Small–mid BD teams, SAM tracking</td>
+            <td><span class="price-tag price-mid">$3,000–$8,000/yr</span></td>
+            <td>Low — generic alerts</td>
+            <td>Medium</td>
+          </tr>
+          <tr>
+            <td><div class="comp-name">USAspending.gov<br><span style="font-size:0.75rem;font-weight:400;color:#6b7280;">DIY — free</span></div></td>
+            <td>Anyone willing to learn the interface</td>
+            <td><span class="price-tag price-low">Free</span></td>
+            <td>None — raw data, no scoring</td>
+            <td>Very high — data literacy required</td>
+          </tr>
+          <tr style="background: #fffbea;">
+            <td><div class="comp-name">LaneIQ <span class="badge badge-yours">You're here</span><br><span style="font-size:0.75rem;font-weight:400;color:#6b7280;">by Rollins Group LLC</span></div></td>
+            <td>Small businesses &amp; growing contractors</td>
+            <td><span class="price-tag price-low">$299–$799 one-time<br>or $259–$699/qtr</span></td>
+            <td><strong>Built specifically for your NAICS, state, size, set-aside</strong></td>
+            <td>None — delivered ready to use</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-green">
+      <div class="callout-icon">✓</div>
+      <div class="callout-text"><strong>The bottom line:</strong> Enterprise-level federal market intelligence, built specifically for your business — without the enterprise price tag, the onboarding curve, or the annual contract.</div>
+    </div>
+
+    <!-- SAM.gov objection — PRESENTER -->
+    <div class="card presenter-only">
+      <div class="card-title">The "I can just use SAM.gov" Objection <span class="tag tag-warning">Most common</span></div>
+      <div class="talk-track">
+        <div class="highlight">
+          "SAM.gov shows you what's open right now. That's the last mile — by the time it's on SAM, the agency has already been planning it for 6–18 months, often with an incumbent in mind. What I'm showing you is the historical award data — who won, what they paid, how many people competed. That's the intelligence that tells you where to position yourself before the solicitation drops."
+        </div>
+      </div>
+    </div>
+
+    <!-- SAM.gov objection — CLIENT -->
+    <div class="card client-only">
+      <div class="card-title">SAM.gov vs LaneIQ</div>
+      <div class="two-col" style="gap:16px;">
+        <div style="background:var(--red-light);border-radius:6px;padding:16px 20px;">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:8px;">SAM.gov Alone</div>
+          <p style="font-size:0.85rem;color:#374151;line-height:1.65;">Shows what's open <strong>right now</strong>. By the time it's posted, the agency has been planning it for 6–18 months — often with an incumbent already in mind. You're competing with everyone who saw the same posting.</p>
+        </div>
+        <div style="background:var(--green-light);border-radius:6px;padding:16px 20px;">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">LaneIQ + SAM.gov</div>
+          <p style="font-size:0.85rem;color:#374151;line-height:1.65;">Historical award data tells you <strong>where to position before the solicitation drops</strong> — who wins, how many competitors exist, which agencies buy repeatedly. Then SAM.gov confirms the opportunity when it's posted.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ PRICING -->
+  <div id="pricing" class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 05 — Pricing</div>
+      <div class="section-title">Lead with the one-time. Let them choose the subscription.</div>
+      <div class="section-subtitle coach-only">Don't present all three tiers at once. Ask how many NAICS they want covered, then quote one number.</div>
+    </div>
+
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="price-card-header">
+          <div class="price-tier">Starter</div>
+          <div class="price-naics">1–3 NAICS codes</div>
+        </div>
+        <div class="price-card-body">
+          <div class="price-label">One-time report</div>
+          <div class="price-onetime">$299</div>
+          <div class="price-sub">$259/qtr or $899/yr for ongoing intel</div>
+        </div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-card-header">
+          <div class="price-tier">Standard</div>
+          <div class="price-naics">4–7 NAICS codes</div>
+        </div>
+        <div class="price-card-body">
+          <div class="price-label">One-time report</div>
+          <div class="price-onetime">$499</div>
+          <div class="price-sub">$429/qtr or $1,499/yr for ongoing intel</div>
+        </div>
+      </div>
+      <div class="price-card">
+        <div class="price-card-header">
+          <div class="price-tier">Premium</div>
+          <div class="price-naics">8–15 NAICS + priority delivery</div>
+        </div>
+        <div class="price-card-body">
+          <div class="price-label">One-time report</div>
+          <div class="price-onetime">$799</div>
+          <div class="price-sub">$699/qtr or $2,399/yr for ongoing intel</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card coach-only">
+      <div class="card-title">How to Present Pricing <span class="tag tag-say">The sequence</span></div>
+      <div class="talk-track">
+        <div class="step-list">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Qualify the NAICS count first</h4><p>"How many NAICS codes are you actively pursuing? Just give me a rough number." — This determines the tier without you having to explain all three.</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Quote one number</h4><p>"For X NAICS codes, a one-time report is $[tier price]. That gets you the full Excel workbook and PDF — everything I just showed you, built for your exact profile."</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Introduce the subscription as the natural follow-on</h4><p>"The market changes quarterly — agencies shift budgets, new solicitations cycle in. Most of my clients do a one-time report to see the value, then move to quarterly so the intel stays current. That's $[qtr price] a quarter."</p></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-content"><h4>The anchor close</h4><p>"The platforms doing what I do for large contractors charge $15,000–$30,000 a year. You're getting the same underlying data — scored and filtered for your business — for less than the cost of one bad SAM.gov bid."</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Add-Ons &amp; How to Purchase</div>
+      <div class="two-col">
+        <div>
+          <p style="font-size:0.85rem;color:#374151;line-height:1.7;">
+            <strong style="color:var(--navy);">Strategy Session — $199</strong><br>
+            60 min walkthrough of your report. We turn the intelligence into a 90-day BD action plan specific to your business. Book instantly via Calendly — no intake form needed.
+            <br><br>
+            <strong style="color:var(--navy);">Priority 24hr Turnaround — $75</strong><br>
+            Upgrade delivery from 48 to 24 hours. Available immediately — no intake form needed.
+          </p>
+        </div>
+        <div>
+          <p style="font-size:0.85rem;color:#374151;line-height:1.7;">
+            <strong style="color:var(--navy);">Mid-Cycle Refresh — 50% of plan price</strong><br>
+            Fresh data run on your existing profile between cycles. Requires intake form to confirm your profile before running.
+            <br><br>
+            <strong style="color:var(--navy);">Additional States — $50 per state</strong><br>
+            Expand your geographic scope. Requires intake form to update your profile before we re-run. Up to 10 additional states per order.
+          </p>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--cream-dark);font-size:0.8rem;color:var(--muted);line-height:1.6;">
+        <strong style="color:var(--navy);">Quick rule:</strong> Strategy Sessions and Priority Turnarounds purchase immediately. Mid-Cycle Refreshes and Additional States require an intake form so we confirm your profile is current before delivering.
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ COMING SOON (swapped from 7) -->
+  <div id="comingsoon" class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 06 — Roadmap</div>
+      <div class="section-title">LaneIQ is growing. Here's what's coming.</div>
+      <div class="section-subtitle">For clients who ask what's next — and for conversations where forward momentum is part of the close.</div>
+    </div>
+
+    <div class="callout callout-navy" style="margin-bottom:24px;">
+      <div class="callout-icon">📍</div>
+      <div class="callout-text"><strong>What you have today</strong> is a complete federal market intelligence report — historical lane scoring, agency buyer rankings, competition analysis, incumbent data, active solicitations, and data quality transparency. Everything below is in active development and coming to LaneIQ subscribers first.</div>
+    </div>
+
+    <div class="coming-grid">
+      <div class="coming-card">
+        <div class="coming-card-title">🔔 Active Opportunity Alerts</div>
+        <div class="coming-card-desc">Get notified the moment a new federal solicitation appears in one of your ranked lanes — before most contractors even know it exists. Set it once. Never miss an opportunity in your market again.</div>
+        <div class="coming-card-value">→ For subscribers on qualifying plans</div>
+      </div>
+      <div class="coming-card">
+        <div class="coming-card-title">📊 Market Delta Reports</div>
+        <div class="coming-card-desc">See exactly what changed in your federal market since your last report — which agencies increased spending, which lanes got more competitive, which incumbents lost ground. Intelligence that compounds over time.</div>
+        <div class="coming-card-value">→ Quarterly add-on for active subscribers</div>
+      </div>
+      <div class="coming-card">
+        <div class="coming-card-title">📍 Positioning Report</div>
+        <div class="coming-card-desc">Where do you actually stand right now? This report maps your past performance, certifications, and contract history against the competitive landscape in your top lanes — so you know your real starting position, not a guess.</div>
+        <div class="coming-card-value">→ One-time or annual add-on</div>
+      </div>
+      <div class="coming-card">
+        <div class="coming-card-title">🗺 State &amp; Local Intelligence</div>
+        <div class="coming-card-desc">LaneIQ's methodology applied to state and local government contracting — the same lane scoring and competition analysis, for SLED markets. For contractors whose pipeline spans beyond federal.</div>
+        <div class="coming-card-value">→ Separate product, coming to the platform</div>
+      </div>
+    </div>
+
+    <!-- PRESENTER coaching on how to use this section -->
+    <div class="card coach-only">
+      <div class="card-title">How to Use This in a Conversation <span class="tag tag-say">Coach note</span></div>
+      <div class="talk-track">
+        <p>Don't lead with this section — it's a closer, not an opener. Use it when:</p><br>
+        <div class="step-list">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><h4>The prospect is on the fence about quarterly vs one-time</h4><p>"Subscribers get early access to everything on the roadmap. Opportunity Alerts alone will be worth the quarterly subscription price when they launch."</p></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><h4>The prospect asks if you're a real company with staying power</h4><p>"We're actively building the next layer of the platform. Clients who come in now lock in current pricing."</p></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><h4>The prospect is sophisticated and wants to know your vision</h4><p>Show them the roadmap. Let them feel like an early adopter who's getting in before everyone else knows about it.</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRESENTER version of positioning line -->
+    <div class="callout callout-gold presenter-only">
+      <div class="callout-icon">⭐</div>
+      <div class="callout-text"><strong>The positioning line:</strong> "The companies doing $10M in federal contracting five years from now are the ones who started making data-driven BD decisions today. Most of your competitors are still searching SAM.gov manually. LaneIQ is how you get ahead of that."</div>
+    </div>
+
+    <!-- CLIENT version of positioning line -->
+    <div class="cta-block client-only">
+      <div class="cta-block-icon">⭐</div>
+      <div>
+        <div class="cta-block-label">The LaneIQ Advantage</div>
+        <div class="cta-block-text">The companies doing $10M in federal contracting five years from now are the ones making data-driven BD decisions today.</div>
+        <div class="cta-block-sub">Most of your competitors are still searching SAM.gov manually. LaneIQ is how you get ahead of that — and stay ahead.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ OBJECTIONS (swapped from 6) — Presenter only section -->
+  <div id="objections" class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Phase 07 — Objection Handling</div>
+      <div class="section-title">Every objection is a question in disguise.</div>
+      <div class="section-subtitle coach-only">Don't argue. Acknowledge, reframe, and give them a reason to move forward.</div>
+    </div>
+
+    <!-- PRESENTER: script rebuttals -->
+    <div class="presenter-only">
+      <div class="objection">
+        <div class="objection-q">"I can get this data myself on SAM.gov or USAspending."</div>
+        <div class="objection-a">"You absolutely can — that's exactly where I pull it from. The difference is what happens after you pull it. USAspending gives you raw CSV files with millions of rows. I've spent months building the scoring model, the filters, and the output format that turns that into a ranked action list specific to your business. You're not paying for the data — <strong>you're paying for the analysis and the hours you don't have to spend doing it yourself.</strong>"</div>
+      </div>
+      <div class="objection">
+        <div class="objection-q">"I don't have the budget for this right now."</div>
+        <div class="objection-a">"I hear that. Let me put it in context — a single federal contract at your size range is worth $50K to $750K. If this report helps you identify one lane you weren't targeting, or avoid one bid you would have lost, <strong>the ROI pays for itself many times over.</strong> The Starter report is $299 — that's less than a Chamber of Commerce membership. What would make it feel like the right time?"</div>
+      </div>
+      <div class="objection">
+        <div class="objection-q">"How is this different from GovWin / Deltek?"</div>
+        <div class="objection-a">"GovWin is an excellent platform — built for large contractors with full-time BD analysts and $15,000–$30,000 a year to spend. I built this for businesses that don't have that infrastructure. <strong>You get the same underlying federal data, scored and filtered specifically for your business profile, delivered as a ready-to-use report. No software. No onboarding. No annual contract.</strong>"</div>
+      </div>
+      <div class="objection">
+        <div class="objection-q">"How current is the data?"</div>
+        <div class="objection-a">"The report covers the last 36 months of USAspending data — I pull the most recent bulk file available, which typically lags by 4–6 weeks. Every report shows a 'Data Through' date so you know exactly what window you're looking at. For a quarterly subscriber, <strong>you're always working with data that's less than 90 days old.</strong> The Active Now tab also shows live solicitations from SAM.gov pulled on the day of delivery."</div>
+      </div>
+      <div class="objection">
+        <div class="objection-q">"We already have a BD person / consultant."</div>
+        <div class="objection-a">"Perfect — this makes their job easier and more targeted. Most BD people spend a significant amount of time doing exactly the kind of market research this report automates. <strong>Hand them the report on day one and they're targeting the right agencies from week one instead of spending months mapping the market themselves.</strong>"</div>
+      </div>
+      <div class="objection">
+        <div class="objection-q">"What if we don't win anything using this?"</div>
+        <div class="objection-a">"Fair question. I want to be straight with you — this is intelligence, not a guarantee. What it does is improve your odds by making sure you're pursuing the right lanes in the first place. Most contractors lose bids not because they bid poorly, but because they're targeting the wrong contracts. <strong>This report tells you where competition is lowest and fit is strongest. The bid still has to be yours.</strong>"</div>
+      </div>
+      <div class="objection">
+        <div class="objection-q">"Can I see a sample report first?"</div>
+        <div class="objection-a">"Yes — I have sample reports across different industries I can share with you right now. What I'd rather do is show you a sample and then ask: does this look like something you'd actually use? Because if the answer is yes, <strong>I'd rather build one for your actual NAICS so you can see what it looks like with your own data.</strong> We can do a one-time report and if you don't find value in it, that's on me to make right."</div>
+      </div>
+    </div>
+
+    <!-- CLIENT: clean FAQ format -->
+    <div class="client-only">
+      <div class="faq-item">
+        <div class="faq-q">How is this different from searching SAM.gov or USAspending myself?</div>
+        <div class="faq-a">USAspending is the raw data source — millions of rows of unprocessed contract records. LaneIQ takes that data, filters it to your exact NAICS codes, contract size, set-aside status, and state, then scores and ranks every lane by how well it fits your business. <strong>You're not paying for the data — you're paying for the analysis delivered in a format you can actually use.</strong></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How current is the data?</div>
+        <div class="faq-a">Reports cover the last 36 months of USAspending data with a typical 4–6 week lag on the most recent file. Every report displays a clear "Data Through" date. Quarterly subscribers always have data less than 90 days old. The Active Now tab pulls live solicitations from SAM.gov on the day of delivery.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How is this different from GovWin or Deltek?</div>
+        <div class="faq-a">GovWin and Deltek are built for large contractors with full-time BD analysts and $15,000–$30,000 annual budgets. <strong>LaneIQ delivers the same underlying federal data, scored and filtered for your specific business — no software to learn, no onboarding, no annual contract.</strong></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if we don't win anything using this?</div>
+        <div class="faq-a">LaneIQ is intelligence, not a guarantee. What it does is improve your odds by ensuring you're pursuing the right lanes in the first place. Most contractors lose bids not because they bid poorly — but because they're targeting the wrong contracts. <strong>This report tells you where competition is lowest and fit is strongest. The bid still has to be yours.</strong></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">We already have a BD consultant. Do we still need this?</div>
+        <div class="faq-a">This makes their job easier and more targeted. Most BD professionals spend significant time doing exactly the market research LaneIQ automates. <strong>Hand them the report on day one and they're targeting the right agencies from week one instead of mapping the market themselves.</strong></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- PRESENTER close -->
+    <div class="callout callout-gold presenter-only">
+      <div class="callout-icon">🏁</div>
+      <div class="callout-text"><strong>The close:</strong> "Here's what I'd suggest — let me pull your NAICS codes and put together a report. You'll see exactly what the data says about your market within 48 hours. If you want to go deeper after that, we can talk about quarterly. What NAICS codes are you actively working in right now?"</div>
+    </div>
+
+    <!-- CLIENT close -->
+    <div class="cta-block client-only">
+      <div class="cta-block-icon">🚀</div>
+      <div>
+        <div class="cta-block-label">Ready to get started?</div>
+        <div class="cta-block-text">See exactly what your federal market looks like — within 48 hours.</div>
+        <div class="cta-block-sub">Tell us your NAICS codes and we'll run your report. One-time, no commitment. If you want ongoing intel after that, quarterly plans start at $259.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleMode(btn) {
+  const isClient = document.body.classList.toggle('client-mode');
+  btn.textContent = isClient ? '👁 Client View' : '👁 Presenter Mode';
+  btn.classList.toggle('client-active', isClient);
+}
+
+// Lock to client mode if ?mode=client in URL
+// Send clients: pitch.rollinsgroupllc.com?mode=client
+// Your presenter link: pitch.rollinsgroupllc.com
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mode') === 'client') {
+    document.body.classList.add('client-mode');
+    const toggle = document.querySelector('.mode-toggle');
+    if (toggle) toggle.style.display = 'none';
+  }
+})();
+</script>
+</body>
+</html>
